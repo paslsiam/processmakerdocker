@@ -19,7 +19,7 @@ services:
     depends_on:
       - mariadb
    mariadb:
-    image: mariadb:latest
+    image: mariadb:10.6.4
     container_name: mariadb:latest
     restart: always
     #volumes:
@@ -38,7 +38,7 @@ services:
       
 networks:
   pm-net:
-    driver: bridge
+    driver: overlay
     ipam:
       driver: default
       config:
