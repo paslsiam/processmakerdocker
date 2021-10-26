@@ -61,7 +61,7 @@ services:
      volumes:
       - ./certs:/certs/
       - ./.env:/opt/processmaker/.env
-      - processmaker-data:/opt/processmaker/storage
+      - processmaker-data:/opt/pm/processmaker
      environment:
        WAIT_FOR_DEPENDENTS: 1
        DOCKER_HOST: 'tcp://remotedocker:45003'
