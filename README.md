@@ -1,6 +1,6 @@
 # ProcessMaker | BPM & Workflow Software Solution
 
-"Enterprises looking for a full Workflow Content Automation Platform with the ability to automate complex workflows should evaluate ProcessMaker. The breadth of capabilities combined with a robust set of industry solutions makes them one to watch."
+"Enterprises looking for a full Workflow Content Automation Platform with the ability to automate complex workflows should evaluate ProcessMaker. The breadth of capabilities combined with a robust set of industry solutions makes them one to watchs."
 
 
 
