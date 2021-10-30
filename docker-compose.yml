@@ -1,4 +1,18 @@
-version: "2.1"
+version: '2.2'
+volumes:
+  mariadb-data:
+  mariadb-logs:
+  pm_data:
+  pm_cnf_dir:
+  pm_cnf_lang:
+  pm_plugins:
+  pm_xml:
+  pm_public:
+  pm_js_lib:
+  pm_tran:
+  pm_shared:
+  pm_logs:
+
 
 networks:
   pm-net:
@@ -6,66 +20,65 @@ networks:
     ipam:
       config:
         - subnet: 172.16.1.0/24
-volumes:
-     mariadb-data:
-     docker-data:
-     processmaker-data:
 
 services:
-   mariadb:
+  mariadb:
     image: mariadb
+    container_name: mariadb_pm
+    domainname: pmprocess.ddns.net
     ports:
       - 3306:3306/tcp
+    restart: always
     environment:
       MYSQL_ROOT_PASSWORD: "pmserver"
       MYSQL_DATABASE: "wf_workflow"
       MYSQL_USER: "admin"
       MYSQL_PASSWORD: "pmserver"
-    networks:
-      - pm-net
     volumes:
       - mariadb-data:/var/lib/mysql
-      - mariadb-logs:/var/lib/mysql
-      - mariadb-conf:/var/lib/mysql
-   
-   redis:
-    image: redis:6
-    ports:
-      - '6379:6379'
+      - mariadb-logs:/var/log/mysql/
     networks:
       - pm-net
-             
-   remotedocker:
-    image: docker:20-dind
-    privileged: true
+    restart: always
+
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: phpmyadmin_pm
+    hostname: phpmyadmin
+    domainname: pmprocess.ddns.net
     ports:
-      - '45003:45003'
-    networks:
-      - pm-net
-    volumes:
-      - ./certs:/certs
-      - docker-data:/var/lib/docker
+     - 8093:80/tcp
     environment:
-      DOCKER_TLS_CERTDIR: '/certs'
-      
-   processmaker:
-     image: eltercera/docker-processmaker
-     ports:
-       - "45001:443"
-     depends_on:
-      - mariadb
-      - redis
-      - remotedocker
-     networks:
+     - PMA_ARBITRARY=1
+    depends_on:
+     - mariadb
+    volumes:
+     - /sessions
+    networks:
+     - pm-net
+    restart: always
+
+  processmaker:
+    image: eltercera/docker-processmaker
+    container_name: processmaker
+    ports:
+     - 8091:80/tcp
+    environment:
+        URL: "127.0.0.1"
+    depends_on:
+     - mariadb
+    volumes:
+     - pm_data:/opt/pm/processmaker/
+     - pm_cnf_dir:/opt/pm/processmaker/workflow/engine/config/
+     - pm_cnf_lang:/opt/pm/processmaker/workflow/engine/content/languages/
+     - pm_plugins:/opt/pm/processmaker/workflow/engine/plugins/
+     - pm_xml:/opt/pm/processmaker/workflow/engine/xmlform/
+     - pm_public:/opt/pm/processmaker/workflow/public_html/
+     - pm_js_lib:/opt/pm/processmaker/workflow/engine/js/labels/
+     - pm_tran:/opt/pm/processmaker/workflow/public_html/translations/
+     - pm_shared:/opt/pm/processmaker/shared/
+     - pm_logs:/opt/pm/processmaker/shared/log/
+    networks:
       - pm-net
-     volumes:
-      - ./certs:/certs/
-      - ./.env:/opt/processmaker/.env
-      - processmaker-data:/opt/pm/processmaker
-     environment:
-       WAIT_FOR_DEPENDENTS: 1
-       DOCKER_HOST: 'tcp://remotedocker:45003'
-       DOCKER_CERT_PATH: '/certs/client'
-       DOCKER_TLS_VERIFY: 1
-       NO_PROXY: '127.0.0.1,localhost,remotedocker:45003'
-     
+    restart: always
