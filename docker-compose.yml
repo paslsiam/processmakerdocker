@@ -1,4 +1,4 @@
-version: '2.2'
+version: '3.1
 volumes:
   mariadb-data:
   mariadb-logs:
@@ -41,6 +41,10 @@ services:
       - mariadb-conf:/etc/mysql/my.cnf
     networks:
       - pm-net
+    deploy:
+      placement:
+        constraints:
+          - node.role==worker
     restart: always
 
 
@@ -59,6 +63,10 @@ services:
      - /sessions
     networks:
      - pm-net
+    deploy:
+      placement:
+        constraints:
+          - node.role==worker
     restart: always
 
   processmaker:
