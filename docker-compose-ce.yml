@@ -1,36 +1,100 @@
-version: "2.1"
+version: '3.1'
+volumes:
+  mariadb-config:
+  mariadb-data:
+  mariadb-logs:
+  pm_data:
+  pm_cnf_dir:
+  pm_cnf_lang:
+  pm_plugins:
+  pm_xml:
+  pm_public:
+  pm_js_lib:
+  pm_tran:
+  pm_shared:
+  pm_logs:
 
-services:
-   mysql:
-     image: mysql:5.6
-     restart: always
-     environment:
-       MYSQL_ROOT_PASSWORD: PM-DBPassw0rd
-       #MYSQL_USER: root
-       #MYSQL_DATABASE: PM-DB
-       #MYSQL_PASSWORD: PM-DBPassw0rd
-     networks:
-     - pm-net
-
-   processmaker:
-     depends_on:
-     - mysql
-     image: eltercera/docker-processmaker
-     ports:
-#       - "80:80"
-       - "8091:80"
-       - "8092:8080"
-     restart: always
-     environment:
-       URL: "127.0.0.1"
-     networks:
-      - pm-net
 
 networks:
   pm-net:
-    driver: bridge
+    driver: overlay
     ipam:
-      driver: default
       config:
-      -
-        subnet: 172.16.150.0/24
+        - subnet: 172.16.1.0/24
+
+services:
+  mariadb:
+    image: mariadb
+    container_name: mariadb_pm
+#    domainname: 172.20.45.22
+    ports:
+      - 3306:3306/tcp
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: "pmserver"
+      MYSQL_DATABASE: "wf_workflow"
+      MYSQL_USER: "admin"
+      MYSQL_PASSWORD: "pmserver"
+    volumes:
+      - /symc/noah/data/maria:/var/lib/mysql
+      - /symc/noah/logs/maria:/var/log/mysql/
+
+    networks:
+      - pm-net
+    deploy:
+      placement:
+        constraints:
+          - node.role==worker
+          - node.hostname==VM-32-WK-Maria-3
+    restart: always
+
+    phpmyadmin:
+      image: phpmyadmin/phpmyadmin:latest
+      container_name: phpmyadmin_pm
+      hostname: phpmyadmin
+#      domainname: 172.20.45.22
+      ports:
+        - 8093:80/tcp
+      environment:
+        - PMA_ARBITRARY=1
+      depends_on:
+        - mariadb
+      volumes:
+        - /sessions
+      networks:
+        - pm-net
+      deploy:
+        placement:
+          constraints:
+            - node.role==worker
+            - node.hostname==VM-32-WK-Maria-3
+      restart: always
+
+      processmaker:
+         image: eltercera/docker-processmaker
+         container_name: processmaker
+         ports:
+          - 8091:80/tcp
+         environment:
+             URL: "127.0.0.1"
+         depends_on:
+          - mariadb
+         volumes:
+          - pm_data:/opt/pm/processmaker/
+          - pm_cnf_dir:/opt/pm/processmaker/workflow/engine/config/
+          - pm_cnf_lang:/opt/pm/processmaker/workflow/engine/content/languages/
+          - pm_plugins:/opt/pm/processmaker/workflow/engine/plugins/
+          - pm_xml:/opt/pm/processmaker/workflow/engine/xmlform/
+          - pm_public:/opt/pm/processmaker/workflow/public_html/
+          - pm_js_lib:/opt/pm/processmaker/workflow/engine/js/labels/
+          - pm_tran:/opt/pm/processmaker/workflow/public_html/translations/
+          - pm_shared:/opt/pm/processmaker/shared/
+          - pm_logs:/opt/pm/processmaker/shared/log/
+         networks:
+           - pm-net
+         deploy:
+           placement:
+             constraints:
+               - node.role==worker
+               - node.hostname==VM-16-PM-1
+         restart: always
