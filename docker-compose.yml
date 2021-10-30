@@ -2,6 +2,7 @@ version: '2.2'
 volumes:
   mariadb-data:
   mariadb-logs:
+  mariadb-conf:
   pm_data:
   pm_cnf_dir:
   pm_cnf_lang:
@@ -37,6 +38,7 @@ services:
     volumes:
       - mariadb-data:/var/lib/mysql
       - mariadb-logs:/var/log/mysql/
+      - mariadb-conf:/etc/mysql/my.cnf
     networks:
       - pm-net
     restart: always
