@@ -80,16 +80,16 @@ services:
          depends_on:
           - mariadb
          volumes:
-          - pm_data:/opt/pm/processmaker/
-          - pm_cnf_dir:/opt/pm/processmaker/workflow/engine/config/
-          - pm_cnf_lang:/opt/pm/processmaker/workflow/engine/content/languages/
-          - pm_plugins:/opt/pm/processmaker/workflow/engine/plugins/
-          - pm_xml:/opt/pm/processmaker/workflow/engine/xmlform/
-          - pm_public:/opt/pm/processmaker/workflow/public_html/
-          - pm_js_lib:/opt/pm/processmaker/workflow/engine/js/labels/
-          - pm_tran:/opt/pm/processmaker/workflow/public_html/translations/
-          - pm_shared:/opt/pm/processmaker/shared/
-          - pm_logs:/opt/pm/processmaker/shared/log/
+          - /symc/noah/data/pm:/opt/pm/processmaker
+          - /symc/noah/data/pm/workflow/engine/config:/opt/pm/processmaker/workflow/engine/config
+          - /symc/noah/data/pm/workflow/engine/content/languages:/opt/pm/processmaker/workflow/engine/content/languages
+          - /symc/noah/data/pm/workflow/engine/plugins:/opt/pm/processmaker/workflow/engine/plugins
+          - /symc/noah/data/pm/workflow/engine/xmlform:/opt/pm/processmaker/workflow/engine/xmlform
+          - /symc/noah/data/pm/workflow/public_html:/opt/pm/processmaker/workflow/public_html
+          - /symc/noah/data/pm/workflow/engine/js/labels:/opt/pm/processmaker/workflow/engine/js/labels
+          - /symc/noah/data/pm/workflow/public_html/translations:/opt/pm/processmaker/workflow/public_html/translations
+          - /symc/noah/data/pm/shared:/opt/pm/processmaker/shared
+          - /symc/noah/data/pm/shared/log:/opt/pm/processmaker/shared/log
          networks:
            - pm-net
          deploy:
